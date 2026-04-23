@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>JoppeWind</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Archivo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
@@ -19,6 +19,15 @@ html, body { height: 100%; background: #eef4f9; font-family: 'DM Sans', sans-ser
   --text: #0f172a; --muted: #64748b; --border: #e2eaf2;
 }
 #root { display: flex; justify-content: center; min-height: 100%; }
+.banner-stars {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.1) 0%, transparent 2%),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,.1) 0%, transparent 2%),
+    radial-gradient(circle at 45% 85%, rgba(255,255,255,.1) 0%, transparent 2%),
+    radial-gradient(circle at 85% 40%, rgba(255,255,255,.08) 0%, transparent 2%);
+  background-size: 120px 120px;
+}
 .app { width: 100%; max-width: 430px; background: var(--bg); min-height: 100vh; padding-bottom: 40px; }
 .card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(2,132,199,.06); overflow: hidden; }
 .tweaks-panel {
@@ -330,19 +339,46 @@ function App() {
 
   return (
     <div className="app">
-      {/* Header */}
-      <div style={{ background:'linear-gradient(160deg,#0c4a6e 0%,#0284c7 100%)', padding:'20px 20px 16px' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-          <div>
-            <div style={{ fontSize:11, color:'#7dd3fc', letterSpacing:'.12em', textTransform:'uppercase', marginBottom:2 }}>windrapport</div>
-            <div style={{ fontSize:22, fontWeight:700, color:'#fff', lineHeight:1 }}>JoppeWind</div>
-            <div style={{ fontSize:12, color:'#93c5fd', marginTop:3 }}>📍 {pos.lat === LAT && pos.lon === LON ? SPOT : `${pos.lat}, ${pos.lon}`} · {now.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'short'})}</div>
+      {/* Header — sunset */}
+      <div style={{ position:'relative', padding:'28px 24px 44px', color:'#fff', overflow:'hidden',
+        background:'linear-gradient(180deg,#f5c06b 0%,#ee8b5b 22%,#d94f4a 48%,#1e5d8c 75%,#0a3a5f 100%)' }}>
+        <div className="banner-stars"/>
+        <div style={{ position:'relative', zIndex:2 }}>
+          {/* top row */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <div style={{ width:36, height:36, borderRadius:'50%', flexShrink:0,
+                background:'linear-gradient(135deg,#1e6091,#0a3a5f)',
+                boxShadow:'0 4px 14px rgba(10,58,95,.45), inset 0 0 0 1px rgba(255,255,255,.15)',
+                display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M2 14 Q6 8 10 14 T18 14 T22 12" stroke="#ffe29a" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M3 18 Q7 14 11 18 T19 18" stroke="#ffe29a" strokeWidth="2" strokeLinecap="round" opacity="0.7"/>
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontFamily:'Archivo,sans-serif', fontSize:9, letterSpacing:'.32em', textTransform:'uppercase', opacity:.85, marginBottom:2 }}>Windrapport</div>
+                <div style={{ fontFamily:'Archivo,sans-serif', fontWeight:900, fontSize:28, letterSpacing:'-.02em', lineHeight:1 }}>
+                  Joppe<span style={{ color:'#ffe29a', textShadow:'0 1px 8px rgba(255,180,100,.3)' }}>Wind</span>
+                </div>
+              </div>
+            </div>
+            <div style={{ fontSize:10, letterSpacing:'.08em', background:'rgba(255,255,255,.18)', backdropFilter:'blur(8px)',
+              padding:'6px 12px', borderRadius:999, border:'1px solid rgba(255,255,255,.28)' }}>
+              {updated ? updated.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}) : '—'}
+            </div>
           </div>
-          <div style={{ textAlign:'right' }}>
-            <div style={{ fontSize:11, color:'#7dd3fc' }}>bijgewerkt</div>
-            <div style={{ fontSize:12, color:'#bfdbfe' }}>{updated ? updated.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}) : '—'}</div>
+          {/* subline */}
+          <div style={{ display:'flex', alignItems:'center', gap:10, fontSize:12, opacity:.95 }}>
+            <span style={{ width:6, height:6, background:'#8ae68a', borderRadius:'50%', boxShadow:'0 0 8px #8ae68a', flexShrink:0 }}/>
+            <span>Live · {pos.lat === LAT && pos.lon === LON ? SPOT : `${pos.lat}, ${pos.lon}`} · {now.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'})}</span>
           </div>
         </div>
+        {/* wave */}
+        <svg viewBox="0 0 400 40" preserveAspectRatio="none"
+          style={{ position:'absolute', left:0, right:0, bottom:-1, width:'100%', height:40 }}>
+          <path d="M0,25 Q100,5 200,20 T400,15 L400,40 L0,40 Z" fill={s.bg}/>
+        </svg>
       </div>
 
       {/* Suitability banner */}
