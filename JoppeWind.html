@@ -476,18 +476,24 @@ function App() {
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
           <div className="card" style={{ padding:'14px 16px' }}>
             <div style={{ fontSize:11, color:'var(--muted)', fontWeight:500, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>Wind nu</div>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'stretch' }}>
-              {/* Links: getallen */}
-              <div>
-                <div style={{ fontSize:38, fontWeight:700, color:'var(--text)', lineHeight:1 }}>{toUnit(curKn, tw.unit)}</div>
-                <div style={{ fontSize:11, color:'var(--muted)', marginBottom:10 }}>{unitLbl(tw.unit)} gem.</div>
-                <div style={{ fontSize:24, fontWeight:700, color:'var(--sky-light)', lineHeight:1 }}>{toUnit(curGustKn, tw.unit)}</div>
-                <div style={{ fontSize:11, color:'var(--muted)' }}>{unitLbl(tw.unit)} vlagen</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gridTemplateRows:'1fr 1fr', gap:0, marginTop:4 }}>
+              {/* LB: gemiddeld */}
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'8px 0' }}>
+                <div style={{ fontSize:36, fontWeight:700, color:'var(--text)', lineHeight:1 }}>{toUnit(curKn, tw.unit)}</div>
+                <div style={{ fontSize:11, color:'var(--muted)', marginTop:3 }}>{unitLbl(tw.unit)} gem.</div>
               </div>
-              {/* Rechts: pijl boven, kompas onder */}
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'space-between' }}>
+              {/* RB: windvaan */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'8px 0' }}>
                 <WindArrow deg={curDir} size={44} color="var(--sky)"/>
-                <div style={{ fontSize:15, fontWeight:700, color:'var(--sky)', letterSpacing:'.04em' }}>{degToCompass(curDir)}</div>
+              </div>
+              {/* LO: vlagen */}
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'8px 0', borderTop:'1px solid var(--border)' }}>
+                <div style={{ fontSize:28, fontWeight:700, color:'var(--sky-light)', lineHeight:1 }}>{toUnit(curGustKn, tw.unit)}</div>
+                <div style={{ fontSize:11, color:'var(--muted)', marginTop:3 }}>{unitLbl(tw.unit)} vlagen</div>
+              </div>
+              {/* RO: kompas */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'8px 0', borderTop:'1px solid var(--border)' }}>
+                <div style={{ fontSize:16, fontWeight:700, color:'var(--sky)', letterSpacing:'.04em' }}>{degToCompass(curDir)}</div>
               </div>
             </div>
           </div>
