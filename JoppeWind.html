@@ -364,12 +364,19 @@ function App() {
         };
         const seamlessMap = toMap(seamless);
         const aromeMap    = toMap(arome);
-        const merge = (t, i, key) => aromeMap[t]?.[key] ?? seamlessMap[t]?.[key] ?? base.hourly[{ speed:'windspeed_10m', gust:'windgusts_10m', dir:'winddirection_10m' }[key]][i];
+        // Pick best model per timestamp as a unit so speed+gust always come from the same source
+        const merged = base.hourly.time.map((t, i) => {
+          const a = aromeMap[t];
+          if (a && a.speed != null && a.gust != null) return a;
+          const k = seamlessMap[t];
+          if (k && k.speed != null && k.gust != null) return k;
+          return { speed: base.hourly.windspeed_10m[i], gust: base.hourly.windgusts_10m[i], dir: base.hourly.winddirection_10m[i] };
+        });
         setApiData({ hourly: {
           time:               base.hourly.time,
-          windspeed_10m:      base.hourly.time.map((t, i) => merge(t, i, 'speed')),
-          windgusts_10m:      base.hourly.time.map((t, i) => merge(t, i, 'gust')),
-          winddirection_10m:  base.hourly.time.map((t, i) => merge(t, i, 'dir')),
+          windspeed_10m:      merged.map(m => m.speed),
+          windgusts_10m:      merged.map(m => m.gust),
+          winddirection_10m:  merged.map(m => m.dir),
         }});
         setUpdated(new Date());
       })
