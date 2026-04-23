@@ -160,7 +160,8 @@ function WindChart({ hours, unit, selectedIdx, currentIdx, onSelect }) {
   const BAR_H = 80;
   const PX_PER_KN = 2; // 40 kn = volle balk
   return (
-    <div style={{ overflowX:'auto', paddingBottom:4 }}>
+    <div>
+      <div style={{ overflowX:'auto', paddingBottom:4 }}>
       <div style={{ display:'flex', alignItems:'flex-end', gap:3, padding:'4px 2px 0', minWidth: hours.length*42 }}>
         {hours.map((h) => {
           const isPast = h.isPast;
@@ -200,6 +201,7 @@ function WindChart({ hours, unit, selectedIdx, currentIdx, onSelect }) {
             </div>
           );
         })}
+      </div>
       </div>
       <div style={{ display:'flex', gap:12, padding:'8px 2px 0', fontSize:11, color:'var(--muted)' }}>
         <span style={{ display:'flex', gap:4, alignItems:'center' }}><span style={{ width:10, height:10, borderRadius:2, background:'var(--sky)', display:'inline-block' }}/>snelheid (boven)</span>
@@ -541,7 +543,7 @@ function App() {
           </div>
           <div className="card" style={{ padding:'12px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
             <WindRose speeds={roseSpeeds} dirs={roseDirs} size={100}/>
-            <div style={{ fontSize:11, color:'var(--muted)', marginTop:4 }}>
+            <div style={{ fontSize:11, color:'var(--muted)', marginTop:10 }}>
               {isLive ? 'komende 8 uur' : `8 uur v.a. ${times[displayIdx].split('T')[1].slice(0,5)}`}
             </div>
           </div>
