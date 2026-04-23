@@ -223,10 +223,14 @@ function SpotMap({ lat, lon, onMove, windDir=0, windSpeed=0 }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    canvas.width  = divRef.current?.offsetWidth || canvas.parentElement?.offsetWidth || 400;
+    canvas.width  = 400;
     canvas.height = 200;
     const W = canvas.width, H = canvas.height;
     const ctx = canvas.getContext('2d');
+
+    // debug: blue tint to confirm canvas is visible
+    ctx.fillStyle = 'rgba(0,100,200,0.3)';
+    ctx.fillRect(0, 0, W, H);
 
     const rad   = (windDir * Math.PI) / 180;
     const vx    = -Math.sin(rad);
@@ -248,10 +252,6 @@ function SpotMap({ lat, lon, onMove, windDir=0, windSpeed=0 }) {
     };
 
     ptcRef.current = Array.from({ length: NUM }, () => ({ ...spawn(), age: Math.random() * 60 }));
-
-    // debug: confirm canvas is on top
-    ctx.fillStyle = 'rgba(255,0,0,0.5)';
-    ctx.fillRect(0, 0, 20, 20);
 
     const animate = () => {
       ctx.clearRect(0, 0, W, H);
