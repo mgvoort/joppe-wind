@@ -163,12 +163,13 @@ function WindChart({ hours, unit }) {
           const gH = (h.gust/maxVal)*BAR_H;
           const sH = (h.speed/maxVal)*BAR_H;
           return (
-            <div key={h.time} style={{ flex:'0 0 38px', display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+            <div key={h.time} style={{ flex:'0 0 38px', display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+              position:'relative', borderRadius:6,
+              outline: isCurrent ? '2px solid var(--sky)' : 'none', outlineOffset:3 }}>
+              {isCurrent && <div style={{ position:'absolute', top:-8, left:'50%', transform:'translateX(-50%)', width:5, height:5, background:'var(--sky)', borderRadius:'50%' }}/>}
               <div style={{ width:26, height:BAR_H, position:'relative', display:'flex', alignItems:'flex-end' }}>
                 <div style={{ position:'absolute', bottom:0, left:0, right:0, height:gH, background: isPast?'#cbd5e1':'var(--gust)', borderRadius:'4px 4px 0 0' }}/>
-                <div style={{ position:'absolute', bottom:0, left:0, right:0, height:sH, background: isPast?'#94a3b8':'var(--sky)', borderRadius:'4px 4px 0 0',
-                  outline: isCurrent ? '2px solid var(--sky)' : 'none', outlineOffset:1 }}/>
-                {isCurrent && <div style={{ position:'absolute', top:-7, left:'50%', transform:'translateX(-50%)', width:5, height:5, background:'var(--sky)', borderRadius:'50%' }}/>}
+                <div style={{ position:'absolute', bottom:0, left:0, right:0, height:sH, background: isPast?'#94a3b8':'var(--sky)', borderRadius:'4px 4px 0 0' }}/>
               </div>
               <div style={{ fontSize:10, fontWeight: isCurrent?700:400, color: isPast?'var(--muted)':'var(--text)', lineHeight:1 }}>
                 {toUnit(h.speed, unit)}
@@ -473,21 +474,21 @@ function App() {
 
         {/* Wind + Windroos */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <div className="card" style={{ padding:'16px 14px' }}>
+          <div className="card" style={{ padding:'14px 16px' }}>
             <div style={{ fontSize:11, color:'var(--muted)', fontWeight:500, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>Wind nu</div>
-            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-              <WindArrow deg={curDir} size={36} color="var(--sky)"/>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              {/* Links: getallen */}
               <div>
-                <div style={{ fontSize:36, fontWeight:700, color:'var(--text)', lineHeight:1 }}>{toUnit(curKn, tw.unit)}</div>
-                <div style={{ fontSize:11, color:'var(--muted)' }}>{unitLbl(tw.unit)} gem.</div>
-              </div>
-            </div>
-            <div style={{ marginTop:10, paddingTop:10, borderTop:'1px solid var(--border)', display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
-              <div>
-                <div style={{ fontSize:22, fontWeight:700, color:'var(--sky-light)', lineHeight:1 }}>{toUnit(curGustKn, tw.unit)}</div>
+                <div style={{ fontSize:38, fontWeight:700, color:'var(--text)', lineHeight:1 }}>{toUnit(curKn, tw.unit)}</div>
+                <div style={{ fontSize:11, color:'var(--muted)', marginBottom:10 }}>{unitLbl(tw.unit)} gem.</div>
+                <div style={{ fontSize:24, fontWeight:700, color:'var(--sky-light)', lineHeight:1 }}>{toUnit(curGustKn, tw.unit)}</div>
                 <div style={{ fontSize:11, color:'var(--muted)' }}>{unitLbl(tw.unit)} vlagen</div>
               </div>
-              <div style={{ fontSize:13, color:'var(--sky)', fontWeight:600 }}>{degToCompass(curDir)}</div>
+              {/* Rechts: pijl + kompas */}
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
+                <WindArrow deg={curDir} size={44} color="var(--sky)"/>
+                <div style={{ fontSize:15, fontWeight:700, color:'var(--sky)', letterSpacing:'.04em' }}>{degToCompass(curDir)}</div>
+              </div>
             </div>
           </div>
           <div className="card" style={{ padding:'12px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
