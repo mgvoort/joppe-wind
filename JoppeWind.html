@@ -476,7 +476,7 @@ function App() {
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
           <div className="card" style={{ padding:'14px 16px' }}>
             <div style={{ fontSize:11, color:'var(--muted)', fontWeight:500, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>Wind nu</div>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'stretch' }}>
               {/* Links: getallen */}
               <div>
                 <div style={{ fontSize:38, fontWeight:700, color:'var(--text)', lineHeight:1 }}>{toUnit(curKn, tw.unit)}</div>
@@ -484,8 +484,8 @@ function App() {
                 <div style={{ fontSize:24, fontWeight:700, color:'var(--sky-light)', lineHeight:1 }}>{toUnit(curGustKn, tw.unit)}</div>
                 <div style={{ fontSize:11, color:'var(--muted)' }}>{unitLbl(tw.unit)} vlagen</div>
               </div>
-              {/* Rechts: pijl + kompas */}
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
+              {/* Rechts: pijl boven, kompas onder */}
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'space-between' }}>
                 <WindArrow deg={curDir} size={44} color="var(--sky)"/>
                 <div style={{ fontSize:15, fontWeight:700, color:'var(--sky)', letterSpacing:'.04em' }}>{degToCompass(curDir)}</div>
               </div>
