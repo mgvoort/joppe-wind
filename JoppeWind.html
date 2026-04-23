@@ -192,14 +192,17 @@ function WindChart({ hours, unit }) {
 }
 
 /* ── Map ── */
-function SpotMap({ lat, lon, onMove }) {
+function SpotMap({ lat, lon, onMove, windDir=0, windSpeed=0 }) {
   const divRef    = useRef(null);
   const mapRef    = useRef(null);
   const markerRef = useRef(null);
+  const canvasRef = useRef(null);
+  const animRef   = useRef(null);
+  const ptcRef    = useRef([]);
 
   useEffect(() => {
     if (mapRef.current || !divRef.current) return;
-    const icon = L.divIcon({ className:'', html:'<div style="width:14px;height:14px;background:#0284c7;border:3px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>', iconSize:[14,14], iconAnchor:[7,7] });
+    const icon = L.divIcon({ className:'', html:'<div style="width:14px;height:14px;background:#1a5c8a;border:3px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>', iconSize:[14,14], iconAnchor:[7,7] });
     const map = L.map(divRef.current, { zoomControl:true, scrollWheelZoom:false, attributionControl:true })
       .setView([lat, lon], 14);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -217,7 +220,67 @@ function SpotMap({ lat, lon, onMove }) {
     mapRef.current.setView([lat, lon], mapRef.current.getZoom());
   }, [lat, lon]);
 
-  return <div ref={divRef} style={{ width:'100%', height:200 }}/>;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const W = canvas.width, H = canvas.height;
+    const ctx = canvas.getContext('2d');
+
+    const rad   = (windDir * Math.PI) / 180;
+    const vx    = -Math.sin(rad);
+    const vy    =  Math.cos(rad);
+    const speed = Math.max(0.4, windSpeed * 0.2);
+    const NUM   = 55;
+    const tail  = speed * 6;
+
+    const spawn = () => {
+      const onEdge = Math.random() > 0.25;
+      if (onEdge) {
+        if (Math.abs(vx) >= Math.abs(vy)) {
+          return { x: vx > 0 ? -tail : W + tail, y: Math.random() * H, age: 0, maxAge: 50 + Math.random() * 50 };
+        } else {
+          return { x: Math.random() * W, y: vy > 0 ? -tail : H + tail, age: 0, maxAge: 50 + Math.random() * 50 };
+        }
+      }
+      return { x: Math.random() * W, y: Math.random() * H, age: 0, maxAge: 50 + Math.random() * 50 };
+    };
+
+    ptcRef.current = Array.from({ length: NUM }, () => ({ ...spawn(), age: Math.random() * 60 }));
+
+    const animate = () => {
+      ctx.clearRect(0, 0, W, H);
+      ptcRef.current.forEach(p => {
+        const alpha = Math.sin((p.age / p.maxAge) * Math.PI) * 0.7;
+        const grad  = ctx.createLinearGradient(p.x - vx * tail, p.y - vy * tail, p.x, p.y);
+        grad.addColorStop(0, `rgba(180,220,255,0)`);
+        grad.addColorStop(1, `rgba(180,220,255,${alpha})`);
+        ctx.beginPath();
+        ctx.strokeStyle = grad;
+        ctx.lineWidth   = 1.4;
+        ctx.moveTo(p.x - vx * tail, p.y - vy * tail);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        p.x += vx * speed;
+        p.y += vy * speed;
+        p.age++;
+        if (p.age > p.maxAge || p.x < -tail-5 || p.x > W+tail+5 || p.y < -tail-5 || p.y > H+tail+5) {
+          Object.assign(p, spawn());
+        }
+      });
+      animRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+    return () => cancelAnimationFrame(animRef.current);
+  }, [windDir, windSpeed]);
+
+  return (
+    <div style={{ position:'relative', width:'100%', height:200 }}>
+      <div ref={divRef} style={{ width:'100%', height:200 }}/>
+      <canvas ref={canvasRef} style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', pointerEvents:'none' }}/>
+    </div>
+  );
 }
 
 /* ── App ── */
@@ -480,7 +543,7 @@ function App() {
         <div className="card" style={{ overflow:'hidden', height:200, position:'relative' }}>
           {refreshing && <div style={{ position:'absolute', top:8, left:'50%', transform:'translateX(-50%)', zIndex:999,
             background:'rgba(26,92,138,.9)', color:'#fff', fontSize:11, padding:'4px 12px', borderRadius:999 }}>Laden…</div>}
-          <SpotMap lat={pos.lat} lon={pos.lon} onMove={moveToPos}/>
+          <SpotMap lat={pos.lat} lon={pos.lon} onMove={moveToPos} windDir={curDir} windSpeed={curKn}/>
         </div>
       </div>
 
