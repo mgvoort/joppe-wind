@@ -55,6 +55,7 @@ const LAT = 52.1886, LON = 4.5185, SPOT = "'t Joppe";
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "unit": "kn",
   "margMin": 16,
+  "redMin": 18,
   "goodMin": 20,
   "greatMin": 24,
   "stormMin": 30
@@ -75,7 +76,8 @@ const unitLbl = u => ({ kn:'kn', bft:'Bft', 'm/s':'m/s', 'km/h':'km/h' }[u] || u
 /* 5-category suitability */
 function suit(knots, tw) {
   if (knots < tw.margMin)  return { key:'none',  label:'Te weinig',  short:'Te weinig', color:'#94a3b8', bg:'#f1f5f9',  dotColor:'#94a3b8' };
-  if (knots < tw.goodMin)  return { key:'marg',  label:'Marginaal',  short:'Marginaal', color:'#d97706', bg:'#fef3c7',  dotColor:'#f59e0b' };
+  if (knots < tw.redMin)   return { key:'marg',  label:'Marginaal',  short:'Marginaal', color:'#d97706', bg:'#fef3c7',  dotColor:'#f59e0b' };
+  if (knots < tw.goodMin)  return { key:'red',   label:'Redelijk',   short:'Redelijk',  color:'#ca8a04', bg:'#fefce8',  dotColor:'#eab308' };
   if (knots < tw.greatMin) return { key:'good',  label:'Goed',       short:'Goed',      color:'#16a34a', bg:'#dcfce7',  dotColor:'#22c55e' };
   if (knots < tw.stormMin) return { key:'great', label:'Heel goed',  short:'Heel goed', color:'#1a5c8a', bg:'#d4e8f5',  dotColor:'#3a7db5' };
   return                          { key:'storm', label:'Hard',       short:'Hard',      color:'#dc2626', bg:'#fee2e2',  dotColor:'#ef4444' };
@@ -624,6 +626,7 @@ function App() {
         </div>
         {[
           { key:'margMin',  label:'Marginaal vanaf (kn)' },
+          { key:'redMin',   label:'Redelijk vanaf (kn)'  },
           { key:'goodMin',  label:'Goed vanaf (kn)'      },
           { key:'greatMin', label:'Heel goed vanaf (kn)' },
           { key:'stormMin', label:'Hard vanaf (kn)'      },
