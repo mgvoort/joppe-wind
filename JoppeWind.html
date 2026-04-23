@@ -14,8 +14,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; background: #eef4f9; font-family: 'DM Sans', sans-serif; }
 :root {
-  --sky: #0284c7; --sky-light: #38bdf8; --sky-pale: #e0f2fe;
-  --gust: #7dd3fc; --bg: #f0f7fc; --card: #fff;
+  --sky: #1a5c8a; --sky-light: #3a7db5; --sky-pale: #d4e8f5;
+  --gust: #5b9ec9; --bg: #f0f7fc; --card: #fff;
   --text: #0f172a; --muted: #64748b; --border: #e2eaf2;
 }
 #root { display: flex; justify-content: center; min-height: 100%; }
@@ -54,9 +54,9 @@ const LAT = 52.1927, LON = 4.5163, SPOT = "'t Joppe";
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "unit": "kn",
-  "margMin": 15,
-  "goodMin": 18,
-  "greatMin": 22,
+  "margMin": 16,
+  "goodMin": 20,
+  "greatMin": 24,
   "stormMin": 30
 }/*EDITMODE-END*/;
 
@@ -74,11 +74,11 @@ const unitLbl = u => ({ kn:'kn', bft:'Bft', 'm/s':'m/s', 'km/h':'km/h' }[u] || u
 
 /* 5-category suitability */
 function suit(knots, tw) {
-  if (knots < tw.margMin)  return { key:'none',  label:'Niet mogelijk',    short:'Niet',      color:'#94a3b8', bg:'#f1f5f9',  dot:'⬤', dotColor:'#94a3b8' };
-  if (knots < tw.goodMin)  return { key:'marg',  label:'Kan misschien net',short:'Kan net',   color:'#d97706', bg:'#fef3c7',  dot:'⬤', dotColor:'#f59e0b' };
-  if (knots < tw.greatMin) return { key:'good',  label:'Goed',             short:'Goed',      color:'#16a34a', bg:'#dcfce7',  dot:'⬤', dotColor:'#22c55e' };
-  if (knots < tw.stormMin) return { key:'great', label:'Heel goed! 🤙',    short:'Heel goed', color:'#0284c7', bg:'#e0f2fe',  dot:'⬤', dotColor:'#0ea5e9' };
-  return                          { key:'storm', label:'Hard',             short:'Hard',      color:'#dc2626', bg:'#fee2e2',  dot:'⬤', dotColor:'#ef4444' };
+  if (knots < tw.margMin)  return { key:'none',  label:'Te weinig',  short:'Te weinig', color:'#94a3b8', bg:'#f1f5f9',  dotColor:'#94a3b8' };
+  if (knots < tw.goodMin)  return { key:'marg',  label:'Marginaal',  short:'Marginaal', color:'#d97706', bg:'#fef3c7',  dotColor:'#f59e0b' };
+  if (knots < tw.greatMin) return { key:'good',  label:'Goed',       short:'Goed',      color:'#16a34a', bg:'#dcfce7',  dotColor:'#22c55e' };
+  if (knots < tw.stormMin) return { key:'great', label:'Heel goed',  short:'Heel goed', color:'#1a5c8a', bg:'#d4e8f5',  dotColor:'#3a7db5' };
+  return                          { key:'storm', label:'Hard',       short:'Hard',      color:'#dc2626', bg:'#fee2e2',  dotColor:'#ef4444' };
 }
 
 /* ── WindArrow ── */
@@ -217,7 +217,7 @@ function SpotMap({ lat, lon, onMove }) {
     mapRef.current.setView([lat, lon], mapRef.current.getZoom());
   }, [lat, lon]);
 
-  return <div ref={divRef} style={{ width:'100%', height:'100%', minHeight:170 }}/>;
+  return <div ref={divRef} style={{ width:'100%', height:200 }}/>;
 }
 
 /* ── App ── */
@@ -230,13 +230,13 @@ function App() {
   const [twOpen, setTwOpen]   = useState(false);
   const [updated, setUpdated] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [refreshing, setRefreshing]   = useState(false);
 
   const moveToPos = (lat, lon) => {
     setPos({ lat, lon });
-    setApiData(null);
     setError(null);
-    setLoading(true);
     setSelectedDay(null);
+    setRefreshing(true);
   };
 
   useEffect(() => {
@@ -278,7 +278,7 @@ function App() {
         setUpdated(new Date());
       })
       .catch(() => setError('Kon weerdata niet ophalen.'))
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); setRefreshing(false); });
   }, [pos.lat, pos.lon]);
 
   if (loading) return (
@@ -394,25 +394,28 @@ function App() {
 
       <div style={{ padding:'16px 14px', display:'flex', flexDirection:'column', gap:12 }}>
 
-        {/* Wind now + Gusts */}
+        {/* Wind + Windroos */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <div className="card" style={{ padding:'16px 14px', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-            <div style={{ fontSize:11, color:'var(--muted)', fontWeight:500, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:8 }}>Wind nu</div>
-            <div style={{ display:'flex', alignItems:'center', gap:8, justifyContent:'center' }}>
-              <WindArrow deg={curDir} size={32} color="var(--sky)"/>
+          <div className="card" style={{ padding:'16px 14px' }}>
+            <div style={{ fontSize:11, color:'var(--muted)', fontWeight:500, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>Wind nu</div>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <WindArrow deg={curDir} size={36} color="var(--sky)"/>
               <div>
-                <div style={{ fontSize:38, fontWeight:700, color:'var(--text)', lineHeight:1 }}>{toUnit(curKn, tw.unit)}</div>
-                <div style={{ fontSize:12, color:'var(--muted)' }}>{unitLbl(tw.unit)}</div>
+                <div style={{ fontSize:36, fontWeight:700, color:'var(--text)', lineHeight:1 }}>{toUnit(curKn, tw.unit)}</div>
+                <div style={{ fontSize:11, color:'var(--muted)' }}>{unitLbl(tw.unit)} gem.</div>
               </div>
             </div>
-            <div style={{ marginTop:8, fontSize:13, color:'var(--sky)', fontWeight:500 }}>{degToCompass(curDir)}</div>
+            <div style={{ marginTop:10, paddingTop:10, borderTop:'1px solid var(--border)', display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+              <div>
+                <div style={{ fontSize:22, fontWeight:700, color:'var(--sky-light)', lineHeight:1 }}>{toUnit(curGustKn, tw.unit)}</div>
+                <div style={{ fontSize:11, color:'var(--muted)' }}>{unitLbl(tw.unit)} vlagen</div>
+              </div>
+              <div style={{ fontSize:13, color:'var(--sky)', fontWeight:600 }}>{degToCompass(curDir)}</div>
+            </div>
           </div>
-
-          <div className="card" style={{ padding:'16px 14px', background:'#fffbeb', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center' }}>
-            <div style={{ fontSize:11, color:'var(--muted)', fontWeight:500, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:8 }}>Windstoten</div>
-            <div style={{ fontSize:38, fontWeight:700, color:'#92400e', lineHeight:1 }}>{toUnit(curGustKn, tw.unit)}</div>
-            <div style={{ fontSize:12, color:'var(--muted)', marginBottom:8 }}>{unitLbl(tw.unit)} max</div>
-            <div style={{ fontSize:12, color:'#d97706', fontWeight:500 }}>+{toUnit(curGustKn - curKn, tw.unit)} boven gem.</div>
+          <div className="card" style={{ padding:'12px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+            <WindRose speeds={roseSpeeds} dirs={roseDirs} size={100}/>
+            <div style={{ fontSize:11, color:'var(--muted)', marginTop:4 }}>komende 8 uur</div>
           </div>
         </div>
 
@@ -473,16 +476,11 @@ function App() {
           </div>
         </div>
 
-        {/* Wind rose + map */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1.5fr', gap:12 }}>
-          <div className="card" style={{ padding:'12px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
-            <div style={{ fontSize:11, color:'var(--muted)', fontWeight:500, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Windroos</div>
-            <WindRose speeds={roseSpeeds} dirs={roseDirs} size={100}/>
-            <div style={{ fontSize:11, color:'var(--muted)', marginTop:4 }}>komende 8 uur</div>
-          </div>
-          <div className="card" style={{ overflow:'hidden', minHeight:170 }}>
-            <SpotMap lat={pos.lat} lon={pos.lon} onMove={moveToPos}/>
-          </div>
+        {/* Map — full width */}
+        <div className="card" style={{ overflow:'hidden', height:200, position:'relative' }}>
+          {refreshing && <div style={{ position:'absolute', top:8, left:'50%', transform:'translateX(-50%)', zIndex:999,
+            background:'rgba(26,92,138,.9)', color:'#fff', fontSize:11, padding:'4px 12px', borderRadius:999 }}>Laden…</div>}
+          <SpotMap lat={pos.lat} lon={pos.lon} onMove={moveToPos}/>
         </div>
       </div>
 
