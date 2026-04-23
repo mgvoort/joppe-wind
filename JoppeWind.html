@@ -228,44 +228,58 @@ function SpotMap({ lat, lon, onMove, windDir=0, windSpeed=0 }) {
     const W = canvas.width, H = canvas.height;
     const ctx = canvas.getContext('2d');
 
-    const rad   = (windDir * Math.PI) / 180;
-    const vx    = -Math.sin(rad);
-    const vy    =  Math.cos(rad);
-    const speed = Math.max(0.6, windSpeed * 0.22);
-    const NUM   = 70;
-    const tail  = speed * 9;
+    const baseRad = (windDir * Math.PI) / 180;
+    const baseSpeed = Math.max(0.8, windSpeed * 0.25);
+    const NUM = 60;
 
     const spawn = () => {
-      const onEdge = Math.random() > 0.25;
-      if (onEdge) {
+      const jitter = (Math.random() - 0.5) * 0.18; // ±~10° richting variatie
+      const r   = baseRad + jitter;
+      const spd = baseSpeed * (0.6 + Math.random() * 0.9);
+      const tail = spd * (14 + Math.random() * 10);
+      const vx  = -Math.sin(r), vy = Math.cos(r);
+      let x, y;
+      if (Math.random() > 0.3) {
         if (Math.abs(vx) >= Math.abs(vy)) {
-          return { x: vx > 0 ? -tail : W + tail, y: Math.random() * H, age: 0, maxAge: 50 + Math.random() * 50 };
+          x = vx > 0 ? -tail : W + tail; y = Math.random() * H;
         } else {
-          return { x: Math.random() * W, y: vy > 0 ? -tail : H + tail, age: 0, maxAge: 50 + Math.random() * 50 };
+          x = Math.random() * W; y = vy > 0 ? -tail : H + tail;
         }
+      } else {
+        x = Math.random() * W; y = Math.random() * H;
       }
-      return { x: Math.random() * W, y: Math.random() * H, age: 0, maxAge: 50 + Math.random() * 50 };
+      return { x, y, vx, vy, spd, tail, age: 0, maxAge: 60 + Math.random() * 60 };
     };
 
-    ptcRef.current = Array.from({ length: NUM }, () => ({ ...spawn(), age: Math.random() * 60 }));
+    ptcRef.current = Array.from({ length: NUM }, () => ({ ...spawn(), age: Math.random() * 80 }));
 
     const animate = () => {
       ctx.clearRect(0, 0, W, H);
       ptcRef.current.forEach(p => {
-        const alpha = Math.sin((p.age / p.maxAge) * Math.PI) * 0.85;
-        const grad  = ctx.createLinearGradient(p.x - vx * tail, p.y - vy * tail, p.x, p.y);
+        const alpha = Math.sin((p.age / p.maxAge) * Math.PI);
+        const tx = p.x - p.vx * p.tail, ty = p.y - p.vy * p.tail;
+        const grad = ctx.createLinearGradient(tx, ty, p.x, p.y);
         grad.addColorStop(0, `rgba(255,255,255,0)`);
-        grad.addColorStop(1, `rgba(255,255,255,${alpha})`);
+        grad.addColorStop(1, `rgba(255,255,255,${alpha * 0.9})`);
+
+        // glow laag
         ctx.beginPath();
         ctx.strokeStyle = grad;
-        ctx.lineWidth   = 1.8;
-        ctx.moveTo(p.x - vx * tail, p.y - vy * tail);
-        ctx.lineTo(p.x, p.y);
+        ctx.lineWidth = 3.5;
+        ctx.moveTo(tx, ty); ctx.lineTo(p.x, p.y);
         ctx.stroke();
-        p.x += vx * speed;
-        p.y += vy * speed;
-        p.age++;
-        if (p.age > p.maxAge || p.x < -tail-5 || p.x > W+tail+5 || p.y < -tail-5 || p.y > H+tail+5) {
+        // scherpe kern
+        const grad2 = ctx.createLinearGradient(tx, ty, p.x, p.y);
+        grad2.addColorStop(0, `rgba(255,255,255,0)`);
+        grad2.addColorStop(1, `rgba(255,255,255,${alpha})`);
+        ctx.beginPath();
+        ctx.strokeStyle = grad2;
+        ctx.lineWidth = 1;
+        ctx.moveTo(tx, ty); ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+
+        p.x += p.vx * p.spd; p.y += p.vy * p.spd; p.age++;
+        if (p.age > p.maxAge || p.x < -p.tail-5 || p.x > W+p.tail+5 || p.y < -p.tail-5 || p.y > H+p.tail+5) {
           Object.assign(p, spawn());
         }
       });
